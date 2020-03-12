@@ -7,7 +7,7 @@ CREATE TABLE employees(
 id INT AUTO_INCREMENT NOT NULL,
 first_name VARCHAR(80) NOT NULL,
 last_name VARCHAR(80) NOT NULL,
-role_id INT NOT NULL,
+role_id INT,
 manager_id INT,
 PRIMARY KEY (id)
 );
@@ -16,7 +16,7 @@ CREATE TABLE role(
     id INT AUTO_INCREMENT NOT NULL,
     title VARCHAR(30) NOT NULL,
     salary INT NOT NULL,
-    department_id INT NOT NULL,
+    department_id INT,
     PRIMARY KEY (id)
 );
 CREATE TABLE department(

@@ -10,7 +10,9 @@ const connection = mysql.createConnection({
   password: process.env.pass,
   database: process.env.dbName
 });
-
+const deptArr = ["Sales"];
+const empArr = ["Sandy Sanders", "Richard Sims"];
+const roleArr = ["Sales Person", "Sales Supervisor"];
 const mainMenu = [
   {
     type: "list",
@@ -19,16 +21,10 @@ const mainMenu = [
     choices: [
       "View All Employees",
       //viewAll();
-      "View All Employees By Department",
-      //viewDep();
-      "View All Employees By Manager",
-      //viewMan();
       "Add Employee",
       //addEmp();
       "Update Employee Role",
       //updateRole();
-      "Update Employee Manager",
-      //updateMan();
       "View All Roles",
       //viewRoles();
       "Add a Role",
@@ -42,25 +38,76 @@ const mainMenu = [
     ]
   }
 ];
+
+//questions for creating new employee
+const newEmployee = [
+  {
+    type: "input",
+    message: "Employee First Name:",
+    name: "firstName"
+  },
+  {
+    type: "input",
+    message: "Employee Last Name:",
+    name: "lastName"
+  },
+  {
+    type: "list",
+    message: "Employee Role:",
+    name: "roleId",
+    choices: roleArr
+  }
+];
+
+//questions for new role
+const newRole = [
+  {
+    type: "input",
+    message: "Enter New Role",
+    name: "createdRole"
+  },
+  {
+    type: "input",
+    message: "Enter Salary",
+    name: "createdSalary"
+  }
+];
+
+//question for new department
+const newDept = [
+  {
+    type: "input",
+    message: "Name of New Department:",
+    name: "newDepartment"
+  }
+];
+
+//question for update role
+const changeRole = [
+  {
+    type: "list",
+    message: "Select employee whose role you would like to update:",
+    name: "selectedEmp",
+    choices: empArr
+  },
+  {
+    type: "list",
+    message: "Select New Role:",
+    name: "selectedRole",
+    choices: roleArr
+  }
+];
+
 function start() {
   inquirer.prompt(mainMenu).then(function(answers) {
     if (answers.start === "View All Employees") {
       viewAll();
-    }
-    if (answers.start === "View All Employees By Department") {
-      viewDep();
-    }
-    if (answers.start === "View All Employees By Manager") {
-      viewMan();
     }
     if (answers.start === "Add Employee") {
       addEmp();
     }
     if (answers.start === "Update Employee Role") {
       updateRole();
-    }
-    if (answers.start === "Update Employee Manager") {
-      updateMan();
     }
     if (answers.start === "View All Roles") {
       viewRoles();
@@ -90,32 +137,46 @@ function viewAll() {
 }
 /////////////////////
 
-function viewDep() {
-  console.log("viewDep");
-  start();
-}
-/////////////////////
-
-function viewMan() {
-  console.log("viewMan");
-  start();
-}
-/////////////////////
+// function roles() {
+//   connection.query("SELECT title FROM role", function(err, res) {
+//     if (err) throw err;
+//     var roleArr = [];
+//     for (let i = 0; i < res.length; i++) {
+//       roleArr.push(res[i].name);
+//     }
+//   });
+// }
 
 function addEmp() {
-  console.log("addEmp");
-  start();
+  inquirer.prompt(newEmployee).then(function(answers) {
+    var query = connection.query(
+      "INSERT INTO employees SET ?",
+      {
+        first_name: answers.firstName,
+        last_name: answers.lastName
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log(
+          res.affectedRows +
+            "You added" +
+            answers.firstName +
+            " " +
+            answers.lastName
+        );
+      }
+    );
+    start();
+  });
 }
+
 /////////////////////
 
 function updateRole() {
-  console.log("updateRole");
-  start();
-}
-/////////////////////
+  inquirer.prompt(changeRole).then(function(answers) {
+    console.log(answers.selectedEmp + answers.selectedRole);
+  });
 
-function updateMan() {
-  console.log("updateMan");
   start();
 }
 /////////////////////
@@ -131,8 +192,22 @@ function viewRoles() {
 /////////////////////
 
 function addRole() {
-  console.log("addRole");
-  start();
+  inquirer.prompt(newRole).then(function(answers) {
+    roleArr.push(answers.createdRole);
+
+    var query = connection.query(
+      "INSERT INTO role SET ?",
+      {
+        title: answers.createdRole,
+        salary: answers.createdSalary
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log(res.affectedRows + "You added: " + answers.createdRole);
+      }
+    );
+    start();
+  });
 }
 /////////////////////
 
@@ -146,8 +221,20 @@ function viewAllDep() {
 /////////////////////
 
 function addDep() {
-  console.log("addDep");
-  start();
+  inquirer.prompt(newDept).then(function(answers) {
+    deptArr.push(answers.newDepartment);
+    var query = connection.query(
+      "INSERT INTO department SET ?",
+      {
+        name: answers.newDepartment
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log(res.affectedRows + "You added " + answers.newDepartment);
+      }
+    );
+    start();
+  });
 }
 /////////////////////
 
@@ -161,4 +248,6 @@ connection.connect(function(err) {
   if (err) throw err;
   console.log("connected as id" + connection.threadId);
 });
+
+// function to start
 start();
